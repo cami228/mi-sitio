@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jueguito romántico 💖</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+    overflow: hidden;
+    color: white;
+  }
+  .hidden { display: none; }
+  #intro, #message, #questions, #shortMsg { max-width: 600px; padding: 20px; }
+  h2 { font-size: 1.5em; }
+  button {
+    margin: 10px;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 25px;
+    background: #ff6f91;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+  }
+  button:hover { background: #ff4f7a; transform: scale(1.05); }
+  #shortMsg { margin-top: 15px; font-size: 1.1em; color: #ffe6e6; opacity: 1; transition: opacity 0.5s;}
+  .heart {
+    position: absolute; bottom: -20px; width: 20px; height: 20px; background: red; transform: rotate(45deg);
+    animation: float 6s infinite ease-in; opacity: 0.3; z-index: 0; /* más transparente */
+  }
+  .heart:before, .heart:after { content:""; position: absolute; width: 20px; height: 20px; background: red; border-radius: 50%; }
+  .heart:before { top: -10px; left:0; } .heart:after { left:-10px; top:0; }
+  @keyframes float { 0%{ transform: translateY(0) rotate(45deg); opacity:0.3 } 100% { transform: translateY(-600px) rotate(45deg); opacity:0 } }
+</style>
+</head>
+<body>
+
+<div id="intro">
+  <h1>Tengo algo especial para ti 💕</h1>
+  <button id="startBtn">Ver mensaje</button>
+</div>
+
+<div id="message" class="hidden"></div>
+<div id="questions" class="hidden"></div>
+<div id="shortMsg" class="hidden"></div>
+
+<script>
+const text = `Amor, sé que a veces dudas de ti, pero quiero recordarte que eres increíble tal y como eres.
+No necesitas compararte con nadie, porque para mí eres perfecta con tu forma de ser, con tus risas y hasta con tus enojos.
+Cuando te falten fuerzas, piensa en mí y en lo mucho que te amo, porque yo siempre voy a estar aquí para recordarte lo valiosa que eres.`;
+
+const intro = document.getElementById("intro");
+const messageEl = document.getElementById("message");
+const questions = document.getElementById("questions");
+const shortMsg = document.getElementById("shortMsg");
+
+document.getElementById("startBtn").addEventListener("click", ()=> {
+  intro.classList.add("hidden");
+  messageEl.classList.remove("hidden");
+  typeWriter();
+  createHearts();
+});
+
+let i=0;
+function typeWriter() {
+  if(i<text.length){
+    messageEl.textContent += text.charAt(i);
+    i++;
+    setTimeout(typeWriter, 40);
+  } else {
+    setTimeout(()=>{
+      messageEl.style.animation="fadeOut 2s forwards";
+      setTimeout(()=>{
+        messageEl.classList.add("hidden");
+        showQuestion(0);
+      },2000);
+    },2000);
+  }
+}
+
+// Corazones flotando
+function createHearts(){
+  setInterval(()=>{
+    const heart = document.createElement("div");
+    heart.classList.add("heart");
+    heart.style.left = Math.random()*100+"vw";
+    heart.style.animationDuration=(3+Math.random()*2)+"s";
+    document.body.appendChild(heart);
+    setTimeout(()=>heart.remove(),6000);
+  },500);
+}
+
+// Preguntas y respuestas
+const questionsData = [
+  {q:"¿Te puedo preguntar algo? 💭", a:["Sí","No"], msg:["",""]},
+  {q:"¿Me amas? 💖", a:["Sí","No"], msg:["❤️ ¡yo mucho más!","ayyyy ya no me amas😢"]},
+  {q:"¿Mucho o poquito? 💕", a:["Mucho","Poquito"], msg:["¡Muchísimo! 💖","Aunque sea poquito… yo te amo muchísimo 💕"]},
+  {q:"Si estuviera contigo ahora mismo, ¿me darías un abrazo? 🤗", a:["Sí","Obvio que sí"], msg:["🤗 Gracias por el abrazo!","😍 Me encanta!"]},
+  {q:"Si te robo un beso 😘, ¿me dejas o te enojas?", a:["Me dejas 💕","Me hago la enojada"], msg:["💋 Gracias por dejar, quiero muchos!","y te contento si te lo doy?"]},
+  {q:"Tal vez te cansaste 💭, ¿quieres seguir?", a:["Sí","No"], msg:["¡Qué bueno! Sigamos 😍","💖 Gracias por jugar conmigo"], next:[7,null]}, 
+  {q:"¿Quién es la persona más hermosa para mí?", a:["Yo 💖","Alguien más"], msg:["💖 Correcto! Siempre serás tú","😢 Incorrecto… nunca habrá alguien más que tú"]},
+  {q:"¿Quieres un mensaje secreto? 💌", a:["Sí","No"], msg:["💖 Te adoro infinitamente","Bueno… igual te quiero mucho, me encantas"]},
+  {q:"¿Quieres que te diga algo más? 💖", a:["Sí","No"], msg:["✨ Eres increíble, me haces feliz, me encantas, sabes ya te extraño","😊 Gracias por jugar conmigo!"]}
+];
+
+let currentQ = 0;
+
+function showQuestion(idx){
+  currentQ = idx;
+  const qd = questionsData[idx];
+  questions.innerHTML = `<h2>${qd.q}</h2>`;
+  qd.a.forEach((ans,i)=>{
+    const btn = document.createElement("button");
+    btn.textContent = ans;
+
+    if(idx===1){ // Pregunta "Me amas?"
+      btn.onclick = () => {
+        shortMsg.textContent = qd.msg[i];
+        shortMsg.classList.remove("hidden");
+        if(i===0){ // Sí
+          setTimeout(()=> {
+            shortMsg.classList.add("hidden");
+            showQuestion(idx+1);
+          }, 2500);
+        }
+        // No -> mensaje permanece visible, no avanza
+      };
+    } else {
+      btn.onclick = ()=> answer(idx,i);
+    }
+
+    questions.appendChild(btn);
+  });
+  questions.classList.remove("hidden");
+  shortMsg.classList.add("hidden");
+}
+
+function answer(qIdx,aIdx){
+  const qd = questionsData[qIdx];
+  showFeedback(qd.msg[aIdx], ()=>{
+    let nextQ = qd.next ? qd.next[aIdx] : qIdx+1;
+    if(nextQ!==null && nextQ<questionsData.length){
+      showQuestion(nextQ);
+    } else {
+      // Último mensaje con botón reinicio y att
+      questions.classList.add("hidden");
+      feedbackMessage("Gracias por jugar 💖<br><br>Att: Tu novio hermoso", true);
+    }
+  });
+}
+
+// Mensaje de feedback en pantalla separada
+function showFeedback(msg, callback){
+  questions.classList.add("hidden");
+  shortMsg.textContent = msg;
+  shortMsg.classList.remove("hidden");
+  setTimeout(()=>{
+    shortMsg.classList.add("hidden");
+    callback();
+  }, 3000);
+}
+
+// Pantalla de cierre
+function feedbackMessage(msg, showRestart=false){
+  questions.innerHTML = `<h2>${msg}</h2>` + (showRestart ? `<button onclick="restart()">Volver al inicio</button>` : '');
+  questions.classList.remove("hidden");
+}
+
+function restart(){ location.reload(); }
+</script>
+
+</body>
+</html>
